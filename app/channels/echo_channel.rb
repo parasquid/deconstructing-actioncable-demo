@@ -8,6 +8,8 @@ class EchoChannel < ApplicationCable::Channel
   end
 
   def chat(data)
+    Rails.logger.info("Received chat data: ")
+    Rails.logger.info(data)
     ActionCable.server.broadcast("EchoChannel", data)
   end
 end

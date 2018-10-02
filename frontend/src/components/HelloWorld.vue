@@ -1,12 +1,51 @@
 <template>
   <div class="hello">
-
+    <form>
+      <button type="submit" @click="subscribe">{{ subscribedState }}</button>
+      <input type="text" v-model="message" />
+      <button type="submit" @click="submit">Submit</button>
+    </form>
   </div>
 </template>
 
 <script>
 export default {
-  name: "HelloWorld"
+  name: "HelloWorld",
+  data() {
+    return {
+      message: "",
+      isSubscribed: false
+    };
+  },
+  computed: {
+    subscribedState() {
+      return this.isSubscribed ? "Unsubscribe" : "Subscribe";
+    }
+  },
+  mounted() {},
+  methods: {
+    subscribe(e) {
+      e.preventDefault();
+      if (!this.isSubscribed) {
+        this.$socket.sendObj({
+          command: "subscribe",
+          identifier: '{"channel":"EchoChannel"}'
+        });
+      }
+      this.isSubscribed = !this.isSubscribed;
+    },
+    submit(e) {
+      e.preventDefault();
+      this.$socket.sendObj({
+        command: "message",
+        identifier: '{"channel":"EchoChannel"}',
+        data: JSON.stringify({
+          message: this.message,
+          action: "chat"
+        })
+      });
+    }
+  }
 };
 </script>
 
