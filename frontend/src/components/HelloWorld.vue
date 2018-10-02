@@ -1,10 +1,16 @@
 <template>
-  <div class="hello">
+  <div>
     <form>
       <button type="submit" @click="subscribe">{{ subscribedState }}</button>
       <input type="text" v-model="message" />
       <button type="submit" @click="submit">Submit</button>
     </form>
+
+    <p>Received messages</p>
+    <ul v-for="msg in receivedMessages">
+      <li>{{ msg }}</li>
+    </ul>
+
   </div>
 </template>
 
@@ -14,6 +20,7 @@ export default {
   data() {
     return {
       message: "",
+      receivedMessages: [],
       isSubscribed: false
     };
   },
@@ -22,7 +29,21 @@ export default {
       return this.isSubscribed ? "Unsubscribe" : "Subscribe";
     }
   },
-  mounted() {},
+  mounted() {
+    this.$options.sockets.onmessage = msg => {
+      const data = JSON.parse(msg.data);
+      if (data && data.message) {
+        if (data.message.action === "chat") {
+          this.receivedMessages.push(data.message.message);
+        } else {
+          console.log(data.message);
+        }
+      }
+    };
+  },
+  destroyed() {
+    delete this.$options.sockets.onmessage;
+  },
   methods: {
     subscribe(e) {
       e.preventDefault();
@@ -44,6 +65,7 @@ export default {
           action: "chat"
         })
       });
+      this.message = "";
     }
   }
 };
